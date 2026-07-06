@@ -42,20 +42,8 @@ Thumbs.db
 # dotCover
 *.dotCover
 
-/.vs/OsuMissAnalyzer/v15/Server/sqlite3
-MissAnalyzerServer
-server.sh
-serverdata/
-stats/
-OsuMissAnalyzer.Tests/Resources/keys.dat
-OsuMissAnalyzer.Tests/Resources/replay-osu_1859001_3243485950.osr
-TestResult.xml
-OsuMissAnalyzer.Tests/Resources/osu!.db
-upload.sh
-libMonoPosixHelper.so
 /OsuMissAnalyzer.Tests/Resources
 /OsuMissAnalyzer.Tests/out
-/publish
-OsuMissAnalyzer.Server/Resources/GitCommit.txt
-settings.json
-appsettings.json
+
+# LLM context files
+AGENTS.md
