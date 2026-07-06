@@ -272,10 +272,13 @@ private async Task HandleBackgroundReplay(string path)
         BeatmapPath = beatmap.Filename,
     };
 
+    string? backgroundImagePath = WindowsNotificationService.GetBackgroundImagePath(beatmap);
+
     WindowsNotificationService.ShowMissNotification(
         $"{beatmap.Artist} - {beatmap.Title}",
         beatmap.Version,
-        analyzer.misses.Count, misaim, misclick, notelock);
+        analyzer.misses.Count, misaim, misclick, notelock,
+        backgroundImagePath);
 }
 
         private void OnNotificationActivated(object? sender, NotificationActivatedEventArgs e)

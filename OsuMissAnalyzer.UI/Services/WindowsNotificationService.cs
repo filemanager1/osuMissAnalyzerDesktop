@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using BMAPI.v1;
+using BMAPI.v1.Events;
 using DesktopNotifications;
 
 namespace OsuMissAnalyzer.UI.Services;
@@ -14,9 +18,19 @@ public static class WindowsNotificationService
     public static INotificationManager? Manager { get; set; }
     public static PendingAnalysis? Pending { get; set; }
 
+    public static string? GetBackgroundImagePath(Beatmap beatmap)
+    {
+        var bgEvent = beatmap.Events.OfType<ContentEvent>()
+            .FirstOrDefault(e => e.Type == ContentType.Image);
+        if (bgEvent == null || string.IsNullOrEmpty(bgEvent.Filename))
+            return null;
+        return Path.Combine(beatmap.Folder, bgEvent.Filename);
+    }
+
     public static void ShowMissNotification(
         string beatmapTitle, string difficulty,
-        int totalMisses, int misaim, int misclick, int notelock)
+        int totalMisses, int misaim, int misclick, int notelock,
+        string? backgroundImagePath = null)
     {
         if (Manager == null) return;
         if (totalMisses == 0) return;
@@ -32,6 +46,11 @@ public static class WindowsNotificationService
             Title = $"{beatmapTitle} [{difficulty}]",
             Body = $"{totalMisses} miss(es){breakdown}",
         };
+
+        if (backgroundImagePath != null && File.Exists(backgroundImagePath))
+        {
+            notification.BodyImagePath = backgroundImagePath;
+        }
 
         notification.Buttons.Add(("View Misses", "view"));
         notification.Buttons.Add(("Dismiss", "dismiss"));
