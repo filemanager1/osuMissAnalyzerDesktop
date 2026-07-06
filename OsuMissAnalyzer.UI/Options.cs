@@ -17,6 +17,13 @@ namespace OsuMissAnalyzer.UI
 		public bool OsuDirAccessible { get; private set; }
         public string SongsFolder => Settings.GetValueOrDefault("songsdir", Settings.ContainsKey("osudir") ? Path.Combine(Settings["osudir"], "Songs") : null);
         public bool WatchDogMode => "true" == Settings.GetValueOrDefault("watchdogmode", Settings.ContainsKey("watchdogmode") ? Settings["watchdogmode"].ToLowerInvariant() : "false");
+		public static void WriteToFile(string file, Dictionary<string, string> settings)
+		{
+			using var writer = new StreamWriter(file);
+			foreach (var kv in settings)
+				if (!string.IsNullOrEmpty(kv.Value))
+					writer.WriteLine($"{kv.Key}={kv.Value}");
+		}
 		public Options(string file, Dictionary<string, string> optList)
 		{
 			OsuDirAccessible = false;

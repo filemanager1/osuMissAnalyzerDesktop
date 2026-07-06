@@ -1,0 +1,70 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="400"
+        x:Class="OsuMissAnalyzer.UI.Views.SetupWizardWindow"
+        Title="osuMissAnalyzer Setup"
+        Width="500" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="Gray" Padding="12,8">
+      <Grid>
+        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="{Binding PageIndicator}" Opacity="0.6" FontSize="12" />
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+          <Button Command="{Binding Back}" IsEnabled="{Binding CanGoBack}" Width="70">Back</Button>
+          <Button Command="{Binding Next}" IsEnabled="{Binding CanGoNext}" IsVisible="{Binding IsNotLastPage}" Width="70">Next ></Button>
+          <Button Command="{Binding Finish}" IsVisible="{Binding Page5Visible}" Width="70">Finish</Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+    <StackPanel Margin="16" Spacing="8">
+      <StackPanel IsVisible="{Binding Page1Visible}" Spacing="8">
+        <TextBlock FontSize="16" FontWeight="Bold">Welcome to osuMissAnalyzer</TextBlock>
+        <TextBlock TextWrapping="Wrap">First, select your osu! installation folder. This allows the program to automatically load your replays and beatmaps from the osu! database.</TextBlock>
+        <TextBlock Margin="0,8,0,0">osu! Directory:</TextBlock>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Click="BrowseOsuDir" Margin="4,0,0,0">Browse...</Button>
+          <TextBox Text="{Binding OsuDir}" Watermark="C:\Users\...\osu!" />
+        </DockPanel>
+        <TextBlock Text="{Binding OsuDirError}" IsVisible="{Binding OsuDirErrorVisible}" Foreground="Red" TextWrapping="Wrap" />
+        <TextBlock Text="osu! directory verified" IsVisible="{Binding OsuDirValid}" Foreground="Green" />
+      </StackPanel>
+      <StackPanel IsVisible="{Binding Page2Visible}" Spacing="8">
+        <TextBlock FontSize="16" FontWeight="Bold">Songs Directory</TextBlock>
+        <TextBlock TextWrapping="Wrap">Optionally specify a custom Songs folder. If left empty, the default location will be used:</TextBlock>
+        <TextBlock Text="{Binding DefaultSongsDir}" FontFamily="Consolas" FontSize="12" />
+        <TextBlock Margin="0,8,0,0">Songs Directory (optional):</TextBlock>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Click="BrowseSongsDir" Margin="4,0,0,0">Browse...</Button>
+          <TextBox Text="{Binding SongsDir}" Watermark="Leave empty for default" />
+        </DockPanel>
+      </StackPanel>
+      <StackPanel IsVisible="{Binding Page3Visible}" Spacing="8">
+        <TextBlock FontSize="16" FontWeight="Bold">Theme</TextBlock>
+        <TextBlock TextWrapping="Wrap">Choose your preferred appearance for the application.</TextBlock>
+        <RadioButton GroupName="Theme" IsChecked="{Binding IsLightTheme}" Margin="0,8,0,0">Light mode</RadioButton>
+        <RadioButton GroupName="Theme" IsChecked="{Binding IsDarkTheme}">Dark mode</RadioButton>
+      </StackPanel>
+      <StackPanel IsVisible="{Binding Page4Visible}" Spacing="8">
+        <TextBlock FontSize="16" FontWeight="Bold">API Key</TextBlock>
+        <TextBlock TextWrapping="Wrap">An osu! API key allows faster beatmap lookups and enables viewing replays of beatmaps you don't have downloaded. Without it, the program will search your Songs folder manually (only works for beatmaps you already have), which can be slow for large collections.</TextBlock>
+        <TextBlock TextWrapping="Wrap">Get a free API key at:</TextBlock>
+        <TextBlock TextWrapping="Wrap" Foreground="Blue">https://osu.ppy.sh/api/</TextBlock>
+        <TextBlock Margin="0,8,0,0">API Key (optional):</TextBlock>
+        <TextBox Text="{Binding ApiKey}" Watermark="Paste your API key here" />
+      </StackPanel>
+      <StackPanel IsVisible="{Binding Page5Visible}" Spacing="8">
+        <TextBlock FontSize="16" FontWeight="Bold">Finish Setup</TextBlock>
+        <CheckBox IsChecked="{Binding WatchDogMode}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>Enable WatchDog Mode</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">Automatically loads the newest replay when a new .osr file is created</TextBlock>
+          </StackPanel>
+        </CheckBox>
+        <TextBlock Margin="0,8,0,4" FontWeight="Bold">Summary:</TextBlock>
+        <TextBlock Text="{Binding SummaryText}" TextWrapping="Wrap" LineHeight="20" FontFamily="Consolas" FontSize="12" />
+      </StackPanel>
+    </StackPanel>
+  </DockPanel>
+</Window>

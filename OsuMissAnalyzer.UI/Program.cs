@@ -53,7 +53,7 @@ namespace OsuMissAnalyzer.UI
             }
             if (help)
             {
-                Console.WriteLine("osu! Miss Analyzer");
+                Console.WriteLine("osuMissAnalyzer");
                 opts.WriteOptionDescriptions(Console.Out);
                 return;
             }

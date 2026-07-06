@@ -10,9 +10,13 @@ Forked from ThereGoesMySanity's [osuMissAnalyzer](https://github.com/ThereGoesMy
 
 ## How To Use
 
-First, edit the options.cfg file and specify your osu! directory (the one with osu!.db in it) and/or the songs directory.
+On first launch, a setup wizard will guide you through configuring your osu! directory, songs folder, API key, theme, and watch mode, all from the UI!
 
-After that, you can run the program by double-clicking the icon or dragging a replay file on to the exe. If you didn't specify a replay file manually, you can select from the five most recent replays found in your osu! directory (saved or otherwise). After this, it'll search your osu!db to find the corresponding beatmap, or open a file chooser dialog if  it couldn't find osu!.db.
+![Setup Wizard](assets/setup-wizard.png)
+
+You can also manually edit `options.cfg` if you prefer.
+
+To run the program, double-click the icon or drag a replay file onto the exe. If you didn't specify a replay file manually, you can select from the five most recent replays found in your osu! directory (saved or otherwise). After this, it'll search your osu!db to find the corresponding beatmap, or open a file chooser dialog if it couldn't find osu!.db.
 
 After it's found the beatmap and replay, it'll analyze the misses and display them in an interactive window.
 
@@ -31,7 +35,7 @@ After it's found the beatmap and replay, it'll analyze the misses and display th
 
 ### Options
 
-In options.cfg, you can define various settings that impact the program.
+All options can be configured through the setup wizard (shown on first launch) or manually in `options.cfg`.
 
 To add these to options.cfg, add a new line formatted `<Setting Name>=<Value>`
 

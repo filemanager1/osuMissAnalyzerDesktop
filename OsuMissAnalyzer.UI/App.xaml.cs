@@ -29,14 +29,14 @@ namespace OsuMissAnalyzer.UI
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
-            if (ReplayLoader.ColorScheme.SchemeType == Core.ColorScheme.Type.Dark)
-            {
-                RequestedThemeVariant = ThemeVariant.Dark;
-            }
-            else
-            {
-                RequestedThemeVariant = ThemeVariant.Light;
-            }
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            RequestedThemeVariant = ReplayLoader.ColorScheme.SchemeType == Core.ColorScheme.Type.Dark
+                ? ThemeVariant.Dark
+                : ThemeVariant.Light;
         }
 
         public override async void OnFrameworkInitializationCompleted()
@@ -45,6 +45,21 @@ namespace OsuMissAnalyzer.UI
             {
                 Window = desktop.MainWindow = new MissWindow();
                 Window.Show();
+
+                if (!ReplayLoader.Options.OsuDirAccessible && !Program.headless)
+                {
+                    var vm = new SetupWizardViewModel(ReplayLoader.Options);
+                    var wizard = new SetupWizardWindow { DataContext = vm };
+                    bool completed = await wizard.ShowDialog<bool>(Window);
+                    if (!completed)
+                    {
+                        Window.Close();
+                        return;
+                    }
+                    ReplayLoader.Options = new Options("options.cfg", new Dictionary<string, string>());
+                    ApplyTheme();
+                }
+
                 if (ReplayLoader.Options.WatchDogMode && (!ReplayLoader.Options.Settings.ContainsKey("osudir") || string.IsNullOrEmpty(ReplayLoader.Options.Settings["osudir"])))
                 {
                     await ShowMessageBox("OsuDir is required when WatchDogMode is enabled.");
