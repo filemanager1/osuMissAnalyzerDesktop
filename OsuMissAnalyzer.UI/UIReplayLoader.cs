@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -35,21 +34,13 @@ namespace OsuMissAnalyzer.UI
 
         public async Task<string?> Load()
         {
-            Debug.Print("Loading Replay file...");
-
             Replay = ReplayFile == null ? await LoadReplay() : new Replay(ReplayFile);
             if (Replay == null)
                 return "Couldn't find replay";
 
-            Debug.Print("Loaded replay {0}", Replay.Filename);
-            Debug.Print("Loading Beatmap file...");
-
             Beatmap ??= BeatmapFile == null ? await LoadBeatmap(Replay) : new Beatmap(BeatmapFile);
             if (Beatmap == null)
                 return "Couldn't find beatmap";
-
-            Debug.Print("Loaded beatmap {0}", Beatmap.Filename);
-            Debug.Print("Analyzing... ");
 
             ReplayAnalyzer = new ReplayAnalyzer(Beatmap, Replay);
 
@@ -211,11 +202,9 @@ namespace OsuMissAnalyzer.UI
 
         private async Task<Beatmap?> GetBeatmapFromHash(string dir, bool isSongsDir)
         {
-            Debug.Print("\nChecking API Key...");
             JArray j = [];
             if (Options.Settings.TryGetValue("apikey", out string? apikey))
             {
-                Debug.Print("Found API key, searching for beatmap...");
                 using HttpClient http = new();
                 j = JArray.Parse(await (await http.GetAsync("https://osu.ppy.sh/api/get_beatmaps" +
                                                         "?k=" + apikey +
@@ -223,7 +212,6 @@ namespace OsuMissAnalyzer.UI
             }
             else if(isSongsDir)
             {
-                Debug.Print("No API key found, searching manually. It could take a while...");
                 _ = App.ShowMessageBox("No API key found, searching manually.\nIt could take a while...");
             }
             return await Task.Run(() =>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using Avalonia;
 using Avalonia.ReactiveUI;
@@ -16,7 +15,6 @@ namespace OsuMissAnalyzer.UI
         // yet and stuff might break.
         public static void Main(string[] args)
         {
-            Debug.Print("Starting MissAnalyser... ");
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
             string replay = null, beatmap = null;
             List<string> extras;
@@ -43,13 +41,7 @@ namespace OsuMissAnalyzer.UI
             if (!File.Exists(optionsFile))
             {
                 File.Create(optionsFile).Close();
-                Debug.Print("\nCreating options.cfg... ");
-                Debug.Print("- In options.cfg, you can define various settings that impact the program. ");
-                Debug.Print("- To add these to options.cfg, add a new line formatted <Setting Name>=<Value> ");
-                Debug.Print("- Available settings : SongsDir | Value = Specify osu!'s songs dir.");
-                Debug.Print("-                       APIKey  | Value = Your osu! API key (https://osu.ppy.sh/api/");
-                Debug.Print("-                       OsuDir  | Value = Your osu! directory");
-                Debug.Print("-                 WatchDogMode  | Value = true or false");
+                File.Create(optionsFile).Close();
             }
             if (help)
             {

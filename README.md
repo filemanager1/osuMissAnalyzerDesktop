@@ -2,11 +2,9 @@
 
 # osu! Miss Analyzer
 
-A program to analyze misses in an osu! replay + better desktop support (coming soon™)
+![osu! Miss Analyzer logo](assets/logo.png)
 
-Credit for the beatmap and replay parsing and analysis code goes to [firedigger](https://github.com/firedigger) from his [osu! replay analyzer](https://github.com/firedigger/osuReplayAnalyzer).
-
-Forked from ThereGoesMySanity's [osuMissAnalyzer](https://github.com/ThereGoesMySanity/osuMissAnalyzer). Go ahead and [sponsor](https://github.com/sponsors/ThereGoesMySanity) the person behind the original project. They deserve it!
+A program to analyze misses in an osu! replay + better desktop support
 
 ## How To Use
 
@@ -50,3 +48,9 @@ To add these to options.cfg, add a new line formatted `<Setting Name>=<Value>`
 ## Alternate Usage
 
 You can also run it from the command line with this format: `osuMissAnalyzer.exe [<replay> [<beatmap>]]`
+
+## Credits
+
+- Beatmap and replay parsing/analysis by [firedigger](https://github.com/firedigger) ([osuReplayAnalyzer](https://github.com/firedigger/osuReplayAnalyzer))
+- Forked from [ThereGoesMySanity's osuMissAnalyzer](https://github.com/ThereGoesMySanity/osuMissAnalyzer), consider [sponsoring](https://github.com/sponsors/ThereGoesMySanity) the original author!
+- Icon by [j8chi - Flaticon](https://www.flaticon.com/free-icons/pixel)

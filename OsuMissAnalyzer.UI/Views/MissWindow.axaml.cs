@@ -13,16 +13,20 @@ namespace OsuMissAnalyzer.UI.Views
         public MissWindow()
         {
             InitializeComponent();
+
+            Activated += (s, e) => App.IsWindowInBackground = false;
+            Deactivated += (s, e) => App.IsWindowInBackground = true;
+
             DataContextChanged += (a, b) =>
+            {
+                if (DataContext is MissWindowViewModel vm)
                 {
-                    if (DataContext != null && DataContext is MissWindowViewModel vm)
-                    {
-                        MissCanvas.GetObservable(BoundsProperty).Subscribe(value => vm.Bounds = value);
-                        PointerWheelChanged += vm.OnMouseWheel;
-                        KeyDown += vm.OnKeyDown;
-                        PointerReleased += vm.OnMouseReleased;
-                    }
-                };
+                    MissCanvas.GetObservable(BoundsProperty).Subscribe(value => vm.Bounds = value);
+                    PointerWheelChanged += vm.OnMouseWheel;
+                    KeyDown += vm.OnKeyDown;
+                    PointerReleased += vm.OnMouseReleased;
+                }
+            };
         }
     }
 }

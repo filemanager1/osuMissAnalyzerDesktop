@@ -2,16 +2,26 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Platform;
+using Avalonia.ReactiveUI;
+using Avalonia.Styling;
+using Avalonia.Threading;
+using BMAPI.v1;
+using DesktopNotifications;
+using DesktopNotifications.Windows;
+using osuDodgyMomentsFinder;
+using OsuMissAnalyzer.Core;
+using OsuMissAnalyzer.UI.Services;
 using OsuMissAnalyzer.UI.ViewModels;
 using OsuMissAnalyzer.UI.Views;
+using ReactiveUI;
+using ReplayAPI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Threading;
-using Avalonia.Markup.Xaml.Styling;
-using Avalonia.Styling;
 
 namespace OsuMissAnalyzer.UI
 {
@@ -19,6 +29,12 @@ namespace OsuMissAnalyzer.UI
     {
         public static Window Window { get; private set; }
         public UIReplayLoader ReplayLoader { get; private set; }
+
+        public static bool IsWindowInBackground { get; set; }
+
+        private static string? _lastReplayPath;
+        private static DateTime _lastReplayTime = DateTime.MinValue;
+        private TrayIcon? _trayIcon;
 
         public App() {}
         public App(UIReplayLoader replayLoader)
@@ -70,17 +86,230 @@ namespace OsuMissAnalyzer.UI
                 await Load(ReplayLoader);
                 if (ReplayLoader.Options.WatchDogMode)
                 {
+                    InitNotifications();
+                    SetupTrayIcon();
                     ReplayLoader.NewReplay += ReplayLoaderOnNewReplay;
                     ReplayLoader.WatchForNewReplays();
                 }
+
+                desktop.Exit += (s, e) =>
+                {
+                    WindowsNotificationService.Manager?.Dispose();
+                    _trayIcon?.Dispose();
+                };
             }
 
             base.OnFrameworkInitializationCompleted();
         }
 
+        private void InitNotifications()
+        {
+            try
+            {
+                var context = WindowsApplicationContext.FromCurrentProcess("OsuMissAnalyzer");
+                var manager = new WindowsNotificationManager(context);
+                WindowsNotificationService.Manager = manager;
+                manager.Initialize().GetAwaiter().GetResult();
+                manager.NotificationActivated += OnNotificationActivated;
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private void SetupTrayIcon()
+        {
+            using var iconStream = AssetLoader.Open(new Uri("avares://OsuMissAnalyzer/Assets/missanalyzer.ico"));
+            var icon = new WindowIcon(iconStream);
+            _trayIcon = new TrayIcon
+            {
+                Icon = icon,
+                ToolTipText = "osuMissAnalyzer (WatchDog active)",
+                Menu = new NativeMenu(),
+            };
+
+            _trayIcon.Clicked += (s, e) => ShowMainWindow();
+
+            var showItem = new NativeMenuItem("Show Window")
+            {
+                Command = ReactiveCommand.Create(ShowMainWindow)
+            };
+            var exitItem = new NativeMenuItem("Exit")
+            {
+                Command = ReactiveCommand.Create(() =>
+                {
+                    _trayIcon?.Dispose();
+                    Environment.Exit(0);
+                })
+            };
+
+            _trayIcon.Menu.Items.Add(showItem);
+            _trayIcon.Menu.Items.Add(new NativeMenuItemSeparator());
+            _trayIcon.Menu.Items.Add(exitItem);
+
+            _trayIcon.IsVisible = false;
+
+            Window.GetObservable(Avalonia.Controls.Window.WindowStateProperty).Subscribe(state =>
+            {
+                if (_trayIcon == null) return;
+
+                if (state == WindowState.Minimized)
+                {
+                    _trayIcon.IsVisible = true;
+                    Window.Hide();
+                    if (WindowsNotificationService.Manager != null)
+                    {
+                        WindowsNotificationService.ShowStatusNotification(
+                            "osuMissAnalyzer",
+                            "WatchDog active, monitoring replays in background!");
+                    }
+                }
+                else
+                {
+                    _trayIcon.IsVisible = false;
+                }
+            });
+        }
+
+        private void ShowMainWindow()
+        {
+            Window.Show();
+            Window.WindowState = WindowState.Normal;
+            Window.Activate();
+            if (_trayIcon != null) _trayIcon.IsVisible = false;
+        }
+
         private void ReplayLoaderOnNewReplay(object? sender, EventArgs e)
         {
-            _ = Load(ReplayLoader);
+            var osuDir = ReplayLoader.Options.Settings.GetValueOrDefault("osudir", "");
+            var latestPath = GetLatestReplayPath(osuDir);
+            if (latestPath == _lastReplayPath && (DateTime.Now - _lastReplayTime).TotalSeconds < 5)
+            {
+                return;
+            }
+
+            _lastReplayPath = latestPath;
+            _lastReplayTime = DateTime.Now;
+
+            if (latestPath == null)
+            {
+                return;
+            }
+
+            if (IsWindowInBackground)
+            {
+                _ = HandleBackgroundReplaySafe(latestPath);
+            }
+            else
+            {
+                _ = Load(ReplayLoader);
+            }
+        }
+
+        private async Task HandleBackgroundReplaySafe(string path)
+        {
+            try
+            {
+                await HandleBackgroundReplay(path);
+            }
+            catch (Exception ex)
+            {
+                try { File.WriteAllText("watchdog_error.log", ex.ToString()); } catch { }
+            }
+        }
+
+private async Task HandleBackgroundReplay(string path)
+{
+    await Task.Delay(1000);
+    if (!File.Exists(path))
+    {
+        return;
+    }
+
+    Replay? replay = await Task.Run(() =>
+    {
+        try
+        {
+            return new Replay(path);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    });
+    if (replay?.GameMode != GameModes.osu)
+    {
+        return;
+    }
+
+    var tempLoader = new UIReplayLoader { Options = ReplayLoader.Options };
+    Beatmap? beatmap = await tempLoader.LoadBeatmap(replay, dialog: false);
+    if (beatmap == null)
+    {
+        return;
+    }
+
+    var analyzer = new ReplayAnalyzer(beatmap, replay);
+    if (analyzer.misses.Count == 0)
+    {
+        return;
+    }
+
+    int misaim = 0, misclick = 0, notelock = 0;
+    foreach (var miss in analyzer.misses)
+    {
+        switch (MissClassifier.Classify(miss, replay, analyzer))
+        {
+            case MissVerdict.Misaim:   misaim++;   break;
+            case MissVerdict.Misclick: misclick++; break;
+            case MissVerdict.Notelock: notelock++; break;
+        }
+    }
+
+    WindowsNotificationService.Pending = new PendingAnalysis
+    {
+        ReplayPath = path,
+        BeatmapPath = beatmap.Filename,
+    };
+
+    WindowsNotificationService.ShowMissNotification(
+        $"{beatmap.Artist} - {beatmap.Title}",
+        beatmap.Version,
+        analyzer.misses.Count, misaim, misclick, notelock);
+}
+
+        private void OnNotificationActivated(object? sender, NotificationActivatedEventArgs e)
+        {
+            if (e.ActionId != "view" || WindowsNotificationService.Pending == null) return;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                ShowMainWindow();
+
+                var loader = new UIReplayLoader
+                {
+                    Options = ReplayLoader.Options,
+                    ReplayFile = WindowsNotificationService.Pending.ReplayPath,
+                    BeatmapFile = WindowsNotificationService.Pending.BeatmapPath,
+                };
+                _ = Load(loader);
+            });
+        }
+
+        private static string? GetLatestReplayPath(string osuDir)
+        {
+            string osuReplays = Path.Combine(osuDir, "Data", "r");
+            string userReplays = Path.Combine(osuDir, "Replays");
+
+            var files = new List<string>();
+            if (Directory.Exists(osuReplays))
+                files.AddRange(Directory.GetFiles(osuReplays, "*.osr"));
+            if (Directory.Exists(userReplays))
+                files.AddRange(Directory.GetFiles(userReplays, "*.osr"));
+
+            return files
+                .OrderByDescending(f => File.GetLastWriteTime(f))
+                .FirstOrDefault();
         }
 
         public static async Task Load(UIReplayLoader loader)
