@@ -7,7 +7,23 @@
         x:Class="OsuMissAnalyzer.UI.Views.MissWindow"
         Icon="/Assets/missanalyzer.ico"
         Title="Miss Analyzer" Width="480" Height="480">
-  <Canvas Name="MissCanvas">
-    <Image Source="{Binding Image, Converter={x:Static converters:BitmapImageConverter.BitmapToImage}}"/>
-  </Canvas>
+  <Grid>
+    <Canvas Name="MissCanvas">
+      <Image Source="{Binding Image, Converter={x:Static converters:BitmapImageConverter.BitmapToImage}}"/>
+    </Canvas>
+    <Border Name="CopyNotification"
+            IsVisible="False"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#CC000000"
+            CornerRadius="12"
+            Padding="24,12">
+      <Border.Transitions>
+        <Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+        </Transitions>
+      </Border.Transitions>
+      <TextBlock Text="Copied!" FontSize="28" FontWeight="Bold" Foreground="White"/>
+    </Border>
+  </Grid>
 </Window>

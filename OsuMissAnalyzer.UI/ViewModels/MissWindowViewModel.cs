@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Input;
 using OsuMissAnalyzer.Core;
@@ -14,6 +15,8 @@ namespace OsuMissAnalyzer.UI.ViewModels
 
         private MissAnalyzer analyzer;
         public MissAnalyzer Analyzer { get => analyzer; set => this.RaiseAndSetIfChanged(ref analyzer, value); }
+
+        public Func<Image, Task>? ClipboardCopyHandler { get; set; }
 
         private UIReplayLoader loader;
         public UIReplayLoader Loader { get => loader; set => this.RaiseAndSetIfChanged(ref loader, value); }
@@ -80,6 +83,10 @@ namespace OsuMissAnalyzer.UI.ViewModels
                 case Key.A:
                     Analyzer.ToggleDrawAllHitObjects();
                     break;
+                case Key.C:
+                    if (ClipboardCopyHandler != null && Image != null)
+                        await ClipboardCopyHandler(Image);
+                    return;
             }
             UpdateImage();
         }
