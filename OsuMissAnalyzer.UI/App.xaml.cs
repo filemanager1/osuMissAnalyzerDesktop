@@ -119,7 +119,7 @@ namespace OsuMissAnalyzer.UI
 
         private void SetupTrayIcon()
         {
-            using var iconStream = AssetLoader.Open(new Uri("avares://OsuMissAnalyzer/Assets/missanalyzer.ico"));
+            using var iconStream = AssetLoader.Open(new Uri("avares://OsuMissAnalyzer/Assets/logo.ico"));
             var icon = new WindowIcon(iconStream);
             _trayIcon = new TrayIcon
             {

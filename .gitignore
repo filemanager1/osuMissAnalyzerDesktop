@@ -47,3 +47,4 @@ Thumbs.db
 
 # LLM context files
 AGENTS.md
+.commandcode
