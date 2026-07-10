@@ -15,6 +15,9 @@ namespace OsuMissAnalyzer.UI.ViewModels
         private string selectedTheme;
         private string apiKey = "";
         private bool watchdogMode;
+        private bool minimizeToTray;
+        private bool backgroundAnalysis = true;
+        private bool backgroundNotifications = true;
         private bool isCompleted;
 
         public Action<bool>? CloseAction { get; set; }
@@ -197,9 +200,52 @@ namespace OsuMissAnalyzer.UI.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref watchdogMode, value);
+                this.RaisePropertyChanged(nameof(BackgroundNotificationsEnabled));
                 this.RaisePropertyChanged(nameof(SummaryText));
             }
         }
+
+        public bool MinimizeToTray
+        {
+            get => minimizeToTray;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref minimizeToTray, value);
+                if (!value && backgroundNotifications)
+                {
+                    BackgroundNotifications = false;
+                }
+                this.RaisePropertyChanged(nameof(BackgroundNotificationsEnabled));
+                this.RaisePropertyChanged(nameof(SummaryText));
+            }
+        }
+
+        public bool BackgroundAnalysis
+        {
+            get => backgroundAnalysis;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref backgroundAnalysis, value);
+                if (!value && backgroundNotifications)
+                {
+                    BackgroundNotifications = false;
+                }
+                this.RaisePropertyChanged(nameof(BackgroundNotificationsEnabled));
+                this.RaisePropertyChanged(nameof(SummaryText));
+            }
+        }
+
+        public bool BackgroundNotifications
+        {
+            get => backgroundNotifications;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref backgroundNotifications, value);
+                this.RaisePropertyChanged(nameof(SummaryText));
+            }
+        }
+
+        public bool BackgroundNotificationsEnabled => WatchDogMode && MinimizeToTray && BackgroundAnalysis;
 
         public bool IsCompleted
         {
@@ -215,7 +261,10 @@ namespace OsuMissAnalyzer.UI.ViewModels
                 string theme = SelectedTheme == "Dark" ? "Dark" : "Light";
                 string api = !string.IsNullOrEmpty(ApiKey) ? "Configured" : "Not configured";
                 string wd = WatchDogMode ? "Enabled" : "Disabled";
-                return $"osu! Directory: {OsuDir}\nSongs Directory: {songs}\nTheme: {theme}\nAPI Key: {api}\nWatchDog Mode: {wd}";
+                string tray = WatchDogMode ? (MinimizeToTray ? "Enabled" : "Disabled") : "N/A";
+                string ba = WatchDogMode ? (BackgroundAnalysis ? "Enabled" : "Disabled") : "N/A";
+                string bn = (WatchDogMode && MinimizeToTray && BackgroundAnalysis) ? (BackgroundNotifications ? "Enabled" : "Disabled") : "N/A";
+                return $"osu! Directory: {OsuDir}\nSongs Directory: {songs}\nTheme: {theme}\nAPI Key: {api}\nWatchDog Mode: {wd}\nMinimize to Tray: {tray}\nBackground Analysis: {ba}\nNotifications: {bn}";
             }
         }
 
@@ -241,6 +290,9 @@ namespace OsuMissAnalyzer.UI.ViewModels
                 {
                     ["osudir"] = OsuDir,
                     ["watchdogmode"] = WatchDogMode ? "true" : "false",
+                    ["minimizetotray"] = MinimizeToTray ? "true" : "false",
+                    ["backgroundanalysis"] = BackgroundAnalysis ? "true" : "false",
+                    ["backgroundnotifications"] = BackgroundNotifications ? "true" : "false",
                     ["colorscheme"] = SelectedTheme
                 };
 

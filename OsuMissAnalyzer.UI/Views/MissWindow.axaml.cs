@@ -17,7 +17,15 @@ namespace OsuMissAnalyzer.UI.Views
         {
             InitializeComponent();
 
-            Activated += (s, e) => App.IsWindowInBackground = false;
+            Activated += (s, e) =>
+            {
+                App.IsWindowInBackground = false;
+                if (App.PendingForegroundReplay)
+                {
+                    App.PendingForegroundReplay = false;
+                    _ = App.Load(App.ReplayLoader);
+                }
+            };
             Deactivated += (s, e) => App.IsWindowInBackground = true;
 
             DataContextChanged += (a, b) =>

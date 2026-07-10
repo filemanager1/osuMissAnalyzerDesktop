@@ -28,9 +28,10 @@ namespace OsuMissAnalyzer.UI
     public class App : Application
     {
         public static Window Window { get; private set; }
-        public UIReplayLoader ReplayLoader { get; private set; }
+        public static UIReplayLoader ReplayLoader { get; private set; }
 
         public static bool IsWindowInBackground { get; set; }
+        internal static bool PendingForegroundReplay { get; set; }
 
         private static string? _lastReplayPath;
         private static DateTime _lastReplayTime = DateTime.MinValue;
@@ -87,9 +88,13 @@ namespace OsuMissAnalyzer.UI
                 if (ReplayLoader.Options.WatchDogMode)
                 {
                     InitNotifications();
-                    SetupTrayIcon();
                     ReplayLoader.NewReplay += ReplayLoaderOnNewReplay;
                     ReplayLoader.WatchForNewReplays();
+
+                    if (ReplayLoader.Options.MinimizeToTray)
+                    {
+                        SetupTrayIcon();
+                    }
                 }
 
                 desktop.Exit += (s, e) =>
@@ -181,6 +186,12 @@ namespace OsuMissAnalyzer.UI
 
         private void ReplayLoaderOnNewReplay(object? sender, EventArgs e)
         {
+            if (!ReplayLoader.Options.BackgroundAnalysis && IsWindowInBackground)
+            {
+                PendingForegroundReplay = true;
+                return;
+            }
+
             var osuDir = ReplayLoader.Options.Settings.GetValueOrDefault("osudir", "");
             var latestPath = GetLatestReplayPath(osuDir);
             if (latestPath == _lastReplayPath && (DateTime.Now - _lastReplayTime).TotalSeconds < 5)
@@ -272,13 +283,18 @@ private async Task HandleBackgroundReplay(string path)
         BeatmapPath = beatmap.Filename,
     };
 
-    string? backgroundImagePath = WindowsNotificationService.GetBackgroundImagePath(beatmap);
+    if (ReplayLoader.Options.BackgroundNotifications)
+    {
+        string? backgroundImagePath = WindowsNotificationService.GetBackgroundImagePath(beatmap);
 
-    WindowsNotificationService.ShowMissNotification(
-        $"{beatmap.Artist} - {beatmap.Title}",
-        beatmap.Version,
-        analyzer.misses.Count, misaim, misclick, notelock,
-        backgroundImagePath);
+        WindowsNotificationService.ShowMissNotification(
+            $"{beatmap.Artist} - {beatmap.Title}",
+            beatmap.Version,
+            analyzer.misses.Count, misaim, misclick, notelock,
+            backgroundImagePath);
+    }
+
+    PendingForegroundReplay = true;
 }
 
         private void OnNotificationActivated(object? sender, NotificationActivatedEventArgs e)

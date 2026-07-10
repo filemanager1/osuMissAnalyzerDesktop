@@ -62,6 +62,24 @@
             <TextBlock FontSize="11" Opacity="0.7">Automatically loads the newest replay when a new .osr file is created</TextBlock>
           </StackPanel>
         </CheckBox>
+        <CheckBox IsChecked="{Binding MinimizeToTray}" IsEnabled="{Binding WatchDogMode}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>Minimize to System Tray</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">When minimized, hide to the system tray instead of the taskbar. An icon will appear in the notification area.</TextBlock>
+          </StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding BackgroundAnalysis}" IsEnabled="{Binding WatchDogMode}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>Analyze replays in the background</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">While the window is inactive or minimized, silently analyze new replays as they appear.</TextBlock>
+          </StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding BackgroundNotifications}" IsEnabled="{Binding BackgroundNotificationsEnabled}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>Show toast notifications</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">Show a Windows toast notification with the miss breakdown. Requires Minimize to Tray and Background Analysis to be enabled.</TextBlock>
+          </StackPanel>
+        </CheckBox>
         <TextBlock Margin="0,8,0,4" FontWeight="Bold">Summary:</TextBlock>
         <TextBlock Text="{Binding SummaryText}" TextWrapping="Wrap" LineHeight="20" FontFamily="Consolas" FontSize="12" />
       </StackPanel>
