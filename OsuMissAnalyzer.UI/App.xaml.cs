@@ -225,7 +225,7 @@ namespace OsuMissAnalyzer.UI
             }
             catch (Exception ex)
             {
-                try { File.WriteAllText("watchdog_error.log", ex.ToString()); } catch { }
+                DebugLogger.Log(ex, path);
             }
         }
 

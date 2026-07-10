@@ -11,6 +11,7 @@ using OsuMissAnalyzer.Core;
 using Avalonia.Controls;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using OsuMissAnalyzer.UI.Services;
 using OsuMissAnalyzer.UI.ViewModels;
 using OsuMissAnalyzer.UI.Views;
 using OsuMissAnalyzer.UI.Models;
@@ -42,12 +43,8 @@ namespace OsuMissAnalyzer.UI
             if (Beatmap == null)
                 return "Couldn't find beatmap";
 
-            ReplayAnalyzer = new ReplayAnalyzer(Beatmap, Replay);
+            ReplayAnalyzer = await Task.Run(() => new ReplayAnalyzer(Beatmap, Replay));
 
-            if (ReplayAnalyzer.misses.Count == 0)
-            {
-                return "No misses found";
-            }
             return null;
         }
 
@@ -175,8 +172,9 @@ namespace OsuMissAnalyzer.UI
                     if (Options.SongsFolder != null) beatmap ??= await GetBeatmapFromHash(Options.SongsFolder, true);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                DebugLogger.Log(ex, ReplayFile, BeatmapFile ?? replay.MapHash);
             }
             if (beatmap == null && dialog)
             {
