@@ -44,6 +44,8 @@ namespace OsuMissAnalyzer.Core
             Replay = replay;
             Beatmap = beatmap;
             ReplayAnalyzer = analyzer;
+            if (MissCount == 0)
+                drawAllHitObjects = true;
         }
 
         public void ToggleOutlines()
@@ -53,7 +55,12 @@ namespace OsuMissAnalyzer.Core
 
         public void ToggleDrawAllHitObjects()
         {
-            if (drawAllHitObjects)
+            if (MissCount == 0)
+            {
+                drawAllHitObjects = true;
+                CurrentObject = 0;
+            }
+            else if (drawAllHitObjects)
             {
                 drawAllHitObjects = false;
                 CurrentObject = ReplayAnalyzer.misses.Count(x => x.StartTime < Beatmap.HitObjects[CurrentObject].StartTime);
