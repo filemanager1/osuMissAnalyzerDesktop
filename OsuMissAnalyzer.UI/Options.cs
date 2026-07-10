@@ -46,7 +46,28 @@ namespace OsuMissAnalyzer.UI
 		}
 		public BMAPI.v1.Beatmap GetBeatmapFromHash(string mapHash)
 		{
-			return Database.GetBeatmapFromHash(mapHash)?.Load(SongsFolder);
+			var entry = Database.GetBeatmapFromHash(mapHash);
+			if (entry == null) return null;
+
+			var path = Path.Combine(SongsFolder, entry.FolderName, entry.OsuFile);
+			if (File.Exists(path))
+				return new BMAPI.v1.Beatmap(path);
+
+			// osu!.db FolderName might be truncated for long folder names.
+			// Fall back to searching by set ID prefix.
+			if (entry.SetID > 0)
+			{
+				var prefix = entry.SetID + " ";
+				var folder = Directory.GetDirectories(SongsFolder, prefix + "*").FirstOrDefault();
+				if (folder != null)
+				{
+					var altPath = Path.Combine(folder, entry.OsuFile);
+					if (File.Exists(altPath))
+						return new BMAPI.v1.Beatmap(altPath);
+				}
+			}
+
+			return null;
 		}
 		public BMAPI.v1.Beatmap GetBeatmapFromId(int mapId)
         {
