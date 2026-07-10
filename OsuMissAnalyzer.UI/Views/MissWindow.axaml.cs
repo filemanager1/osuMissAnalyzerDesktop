@@ -42,6 +42,9 @@ namespace OsuMissAnalyzer.UI.Views
                         CopyImageToClipboard(img);
                         await ShowCopyNotification();
                     };
+
+                    if (vm.Analyzer.MissCount == 0)
+                        _ = ShowNotification("No misses - showing all objects", 2000);
                 }
             };
         }
@@ -105,6 +108,17 @@ namespace OsuMissAnalyzer.UI.Views
             CopyNotification.Opacity = 0;
             await Task.Delay(300);
             CopyNotification.IsVisible = false;
+        }
+
+        private async Task ShowNotification(string text, int durationMs = 2000)
+        {
+            MissesNotificationText.Text = text;
+            MissesNotification.IsVisible = true;
+            MissesNotification.Opacity = 1;
+            await Task.Delay(durationMs);
+            MissesNotification.Opacity = 0;
+            await Task.Delay(300);
+            MissesNotification.IsVisible = false;
         }
 
         [DllImport("user32.dll", SetLastError = true)]

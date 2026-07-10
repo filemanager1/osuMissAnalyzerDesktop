@@ -25,5 +25,19 @@
       </Border.Transitions>
       <TextBlock Text="Copied!" FontSize="28" FontWeight="Bold" Foreground="White"/>
     </Border>
+    <Border Name="MissesNotification"
+            IsVisible="False"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="#CC000000"
+            CornerRadius="12"
+            Padding="24,12">
+      <Border.Transitions>
+        <Transitions>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+        </Transitions>
+      </Border.Transitions>
+      <TextBlock Name="MissesNotificationText" FontSize="28" FontWeight="Bold" Foreground="White"/>
+    </Border>
   </Grid>
 </Window>
