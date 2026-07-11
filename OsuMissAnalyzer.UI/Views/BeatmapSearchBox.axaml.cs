@@ -19,6 +19,14 @@ namespace OsuMissAnalyzer.UI.Views
             SearchBox.KeyDown += SearchBox_KeyDown;
         }
 
+        public void ButtonClicked(object? sender, RoutedEventArgs args)
+        {
+            if (sender is Button b && (b.Content as string) == "Ok")
+                Close(Result != null);
+            else
+                Close(false);
+        }
+
         public void Text_DoubleTapped(object o, RoutedEventArgs e)
         {
             Close(Result != null);

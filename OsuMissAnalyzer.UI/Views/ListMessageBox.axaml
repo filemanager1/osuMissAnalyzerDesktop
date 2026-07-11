@@ -13,9 +13,7 @@
   <DockPanel>
     <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="16" Spacing="16"
                 HorizontalAlignment="Center" >
-      <Button Width="120" Click="ButtonClicked"
-              IsEnabled="{Binding Result, Converter={x:Static ObjectConverters.IsNotNull}}"
-              Content="Ok"/>
+      <Button Width="120" Click="ButtonClicked" Content="Ok"/>
       <Button Width="120" Click="ButtonClicked" Content="Cancel"/>
     </StackPanel>
       <DataGrid Name="Results" ItemsSource="{Binding Items}" SelectedItem="{Binding Result, Mode=TwoWay}"

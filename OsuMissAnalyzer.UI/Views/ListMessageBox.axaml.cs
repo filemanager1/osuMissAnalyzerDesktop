@@ -20,7 +20,10 @@ namespace OsuMissAnalyzer.UI.Views
 
         public void ButtonClicked(object? sender, RoutedEventArgs args)
         {
-            if (sender is Button b) Close((b.Content as string) == "Ok");
+            if (sender is Button b && (b.Content as string) == "Ok")
+                Close(Result != null);
+            else
+                Close(false);
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
