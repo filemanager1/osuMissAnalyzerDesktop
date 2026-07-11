@@ -28,6 +28,7 @@ namespace OsuMissAnalyzer.UI
         public required Options Options { get; set; }
         public string? ReplayFile { get; set; }
         public string? BeatmapFile { get; set; }
+        public bool ShowReplayPicker { get; set; }
         public event EventHandler? NewReplay;
         private FileSystemWatcher[]? fileSystemWatchers;
 
@@ -72,7 +73,7 @@ namespace OsuMissAnalyzer.UI
                 DataContext = new ReplayOptionBoxViewModel(Options)
             };
 
-            bool skipLoadDialog = Options.WatchDogMode;
+            bool skipLoadDialog = Options.WatchDogMode && !ShowReplayPicker;
             if (skipLoadDialog || await messageBox.ShowDialog<bool>(App.Window))
             {
                 var userResult = skipLoadDialog ? ReplayFind.WATCHDOG : messageBox.Result;

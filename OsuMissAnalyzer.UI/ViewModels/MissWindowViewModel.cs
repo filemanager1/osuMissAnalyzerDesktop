@@ -80,6 +80,10 @@ namespace OsuMissAnalyzer.UI.ViewModels
                 case Key.R:
                     _ = App.Load(new UIReplayLoader { Options = Loader.Options });
                     break;
+                case Key.O:
+                    if (e.KeyModifiers == KeyModifiers.Control)
+                        _ = App.Load(new UIReplayLoader { Options = Loader.Options, ShowReplayPicker = true });
+                    break;
                 case Key.A:
                     Analyzer.ToggleDrawAllHitObjects();
                     break;

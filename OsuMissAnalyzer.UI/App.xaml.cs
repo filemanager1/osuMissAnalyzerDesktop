@@ -35,6 +35,7 @@ namespace OsuMissAnalyzer.UI
 
         private static string? _lastReplayPath;
         private static DateTime _lastReplayTime = DateTime.MinValue;
+        private static bool _isLoading;
         private TrayIcon? _trayIcon;
 
         public App() {}
@@ -333,44 +334,53 @@ private async Task HandleBackgroundReplay(string path)
 
         public static async Task Load(UIReplayLoader loader)
         {
-            if (!Dispatcher.UIThread.CheckAccess())
+            if (_isLoading) return;
+            _isLoading = true;
+            try
             {
-                await Dispatcher.UIThread.InvokeAsync(() => Load(loader));
-                return;
-            }
-            string? errorMessage, result = null;
-            do
-            {
-                try
+                if (!Dispatcher.UIThread.CheckAccess())
                 {
-                    if ((errorMessage = await loader.Load()) == null)
+                    await Dispatcher.UIThread.InvokeAsync(() => Load(loader));
+                    return;
+                }
+                string? errorMessage, result = null;
+                do
+                {
+                    try
                     {
-                        Window.DataContext = new MissWindowViewModel(loader);
-                        return;
-                    }
+                        if ((errorMessage = await loader.Load()) == null)
+                        {
+                            Window.DataContext = new MissWindowViewModel(loader);
+                            return;
+                        }
 
-                    if (loader.Options.WatchDogMode)
-                        return;
-                }
-                catch (Exception e)
-                {
-                    errorMessage = e.Message;
-                    File.WriteAllText("exception.log", e.ToString());
-                }
-                if (errorMessage != null)
-                {
-                    result = await ShowMessageBox($"An error has occurred.\n{errorMessage}", "OK", "Reload");
-                    if (result != "Reload")
-                    {
-                        Window.Close();
-                        return;
+                        if (loader.Options.WatchDogMode)
+                            return;
                     }
-                    else
+                    catch (Exception e)
                     {
-                        loader = new UIReplayLoader { Options = loader.Options };
+                        errorMessage = e.Message;
+                        File.WriteAllText("exception.log", e.ToString());
                     }
-                }
-            } while (result == "Reload");
+                    if (errorMessage != null)
+                    {
+                        result = await ShowMessageBox($"An error has occurred.\n{errorMessage}", "OK", "Reload");
+                        if (result != "Reload")
+                        {
+                            Window.Close();
+                            return;
+                        }
+                        else
+                        {
+                            loader = new UIReplayLoader { Options = loader.Options };
+                        }
+                    }
+                } while (result == "Reload");
+            }
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         public static async Task ShowMessageBox(string message)
