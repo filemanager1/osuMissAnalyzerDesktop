@@ -400,5 +400,39 @@ private async Task HandleBackgroundReplay(string path)
             };
             return await window.ShowDialog<string>(Window);
         }
+
+        public static async void OpenSettings(Options options)
+        {
+            string oldOsuDir = options.Settings.GetValueOrDefault("osudir", "");
+            bool oldWatchDog = options.WatchDogMode;
+            bool oldMinimizeToTray = options.MinimizeToTray;
+            string oldSongsDir = options.Settings.GetValueOrDefault("songsdir", "");
+
+            var vm = new SettingsWindowViewModel(options);
+            var window = new SettingsWindow { DataContext = vm };
+            bool saved = await window.ShowDialog<bool>(Window);
+            if (!saved) return;
+
+            ReplayLoader.Options = new Options("options.cfg", new Dictionary<string, string>());
+
+            bool needsRestart = ReplayLoader.Options.Settings.GetValueOrDefault("osudir", "") != oldOsuDir
+                || ReplayLoader.Options.Settings.GetValueOrDefault("songsdir", "") != oldSongsDir
+                || ReplayLoader.Options.WatchDogMode != oldWatchDog
+                || ReplayLoader.Options.MinimizeToTray != oldMinimizeToTray;
+
+            ReplayLoader.Options.Settings.TryGetValue("colorscheme", out string? scheme);
+            if (Window.DataContext is MissWindowViewModel mvm && mvm.Loader != null)
+            {
+                mvm.Loader.Options = ReplayLoader.Options;
+            }
+            ((App)Current!).RequestedThemeVariant = scheme == "Dark"
+                ? ThemeVariant.Dark
+                : ThemeVariant.Light;
+
+            if (needsRestart)
+            {
+                await ShowMessageBox("Please restart the application for changes to take effect.");
+            }
+        }
     }
 }

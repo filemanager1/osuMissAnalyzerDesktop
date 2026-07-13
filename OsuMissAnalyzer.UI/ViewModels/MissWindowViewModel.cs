@@ -52,47 +52,58 @@ namespace OsuMissAnalyzer.UI.ViewModels
 
         internal async void OnKeyDown(object? source, KeyEventArgs e)
         {
-            switch (e.Key)
+            try
             {
-                case Key.Up:
-                    Analyzer.ScaleChange(-1);
-                    break;
-                case Key.Down:
-                    Analyzer.ScaleChange(1);
-                    break;
-                case Key.Right:
-                    Analyzer.NextObject();
-                    break;
-                case Key.Left:
-                    Analyzer.PreviousObject();
-                    break;
-                case Key.T:
-                    Analyzer.ToggleOutlines();
-                    break;
-                case Key.P:
-                    int i = 0;
-                    foreach (var img in Analyzer.DrawAllMisses(Area))
-                    {
-                        string filename = $"{Path.GetFileNameWithoutExtension(Loader.Replay!.Filename)}.{i++}.png";
-                        await img.SaveAsPngAsync(filename);
-                    }
-                    break;
-                case Key.R:
-                    _ = App.Load(new UIReplayLoader { Options = Loader.Options });
-                    break;
-                case Key.O:
-                    if (e.KeyModifiers == KeyModifiers.Control)
-                        _ = App.Load(new UIReplayLoader { Options = Loader.Options, ShowReplayPicker = true });
-                    break;
-                case Key.A:
-                    Analyzer.ToggleDrawAllHitObjects();
-                    break;
-                case Key.C:
-                    if (ClipboardCopyHandler != null && Image != null)
-                        await ClipboardCopyHandler(Image);
-                    return;
+                switch (e.Key)
+                {
+                    case Key.Up:
+                        Analyzer.ScaleChange(-1);
+                        break;
+                    case Key.Down:
+                        Analyzer.ScaleChange(1);
+                        break;
+                    case Key.Right:
+                        Analyzer.NextObject();
+                        break;
+                    case Key.Left:
+                        Analyzer.PreviousObject();
+                        break;
+                    case Key.T:
+                        Analyzer.ToggleOutlines();
+                        break;
+                    case Key.P:
+                        int i = 0;
+                        foreach (var img in Analyzer.DrawAllMisses(Area))
+                        {
+                            string filename = $"{Path.GetFileNameWithoutExtension(Loader.Replay!.Filename)}.{i++}.png";
+                            await img.SaveAsPngAsync(filename);
+                        }
+                        break;
+                    case Key.R:
+                        _ = App.Load(new UIReplayLoader { Options = Loader.Options });
+                        break;
+                    case Key.O:
+                        if (e.KeyModifiers == KeyModifiers.Control)
+                            _ = App.Load(new UIReplayLoader { Options = Loader.Options, ShowReplayPicker = true });
+                        break;
+                    case Key.OemComma:
+                        if (e.KeyModifiers == KeyModifiers.Control)
+                            App.OpenSettings(Loader.Options);
+                        break;
+                    case Key.A:
+                        Analyzer.ToggleDrawAllHitObjects();
+                        break;
+                    case Key.C:
+                        if (ClipboardCopyHandler != null && Image != null)
+                            await ClipboardCopyHandler(Image);
+                        return;
+                }
+                UpdateImage();
             }
-            UpdateImage();
+            catch (Exception ex)
+            {
+                File.WriteAllText("exception.log", $"OnKeyDown: {ex}");
+            }
         }
         internal void OnMouseWheel(object? source, PointerWheelEventArgs e)
         {

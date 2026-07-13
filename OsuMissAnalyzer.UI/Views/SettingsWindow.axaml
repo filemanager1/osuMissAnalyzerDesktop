@@ -1,0 +1,79 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="500"
+        x:Class="OsuMissAnalyzer.UI.Views.SettingsWindow"
+        Title="Settings"
+        Width="500" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner">
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" BorderThickness="0,1,0,0" BorderBrush="Gray" Padding="12,8">
+      <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="4">
+        <Button Click="Cancel_Click" Width="70">Cancel</Button>
+        <Button Click="Save_Click" Width="70">Save</Button>
+      </StackPanel>
+    </Border>
+    <ScrollViewer>
+      <StackPanel Margin="16" Spacing="8">
+        <TextBlock FontSize="16" FontWeight="Bold">Paths</TextBlock>
+        <TextBlock Margin="0,4,0,0">osu! Directory:</TextBlock>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Click="BrowseOsuDir" Margin="4,0,0,0">Browse...</Button>
+          <TextBox Text="{Binding OsuDir}" Watermark="C:\Users\...\osu!" />
+        </DockPanel>
+        <TextBlock Text="{Binding OsuDirError}" IsVisible="{Binding OsuDirErrorVisible}" Foreground="Red" TextWrapping="Wrap" />
+        <TextBlock Text="osu! directory verified" IsVisible="{Binding OsuDirValid}" Foreground="Green" />
+        <TextBlock Margin="0,8,0,0">Songs Directory (optional):</TextBlock>
+        <TextBlock Text="{Binding DefaultSongsDir}" FontFamily="Consolas" FontSize="12" Opacity="0.6" />
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Click="BrowseSongsDir" Margin="4,0,0,0">Browse...</Button>
+          <TextBox Text="{Binding SongsDir}" Watermark="Leave empty for default" />
+        </DockPanel>
+
+        <Border Height="1" Background="Gray" Opacity="0.3" Margin="0,8" />
+
+        <TextBlock FontSize="16" FontWeight="Bold">Appearance</TextBlock>
+        <RadioButton GroupName="Theme" IsChecked="{Binding IsLightTheme}" Margin="0,4">Light mode</RadioButton>
+        <RadioButton GroupName="Theme" IsChecked="{Binding IsDarkTheme}">Dark mode</RadioButton>
+
+        <Border Height="1" Background="Gray" Opacity="0.3" Margin="0,8" />
+
+        <TextBlock FontSize="16" FontWeight="Bold">API</TextBlock>
+        <TextBox Text="{Binding ApiKey}" Watermark="osu! API key (optional)" />
+
+        <Border Height="1" Background="Gray" Opacity="0.3" Margin="0,8" />
+
+        <TextBlock FontSize="16" FontWeight="Bold">WatchDog</TextBlock>
+        <CheckBox IsChecked="{Binding WatchDogMode}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>WatchDog Mode</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">Automatically loads the newest replay when a new .osr file is created</TextBlock>
+          </StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding MinimizeToTray}" IsEnabled="{Binding WatchDogMode}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>Minimize to System Tray</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">When minimized, hide to the system tray instead of the taskbar</TextBlock>
+          </StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding BackgroundAnalysis}" IsEnabled="{Binding WatchDogMode}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>Analyze replays in the background</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">While the window is inactive or minimized, silently analyze new replays</TextBlock>
+          </StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding BackgroundNotifications}" IsEnabled="{Binding BackgroundNotificationsEnabled}" Margin="0,4">
+          <StackPanel>
+            <TextBlock>Show toast notifications</TextBlock>
+            <TextBlock FontSize="11" Opacity="0.7">Show a Windows toast notification with the miss breakdown</TextBlock>
+          </StackPanel>
+        </CheckBox>
+
+        <TextBlock Margin="0,8,0,0" TextAlignment="Center" Opacity="0.5" FontSize="11">
+          <Run Text="Some changes (osu! directory, WatchDog) may require restarting the app." />
+        </TextBlock>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</Window>
